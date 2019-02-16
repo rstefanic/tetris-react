@@ -1,0 +1,44 @@
+body {
+    background-color: gainsboro;
+}
+
+h1 {
+    text-align: center;
+}
+
+.half {
+    float: left;
+    width: 50%;
+}
+
+.left-half {
+    float:right;
+}
+
+.game {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.game-board {
+    background-color: #ededed;
+    border: 2px solid #000;
+    float: right;
+    margin: 1% auto;
+    width: fit-content;
+}
+
+.game-info {
+    float: left;
+    margin-left: 5%;
+}
+
+.tile-row > * {
+    display: inline-block;
+    margin: 0 2px;
+}
+
+.tile {
+    height: 20px;
+    width: 20px;
+}
