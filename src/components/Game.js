@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import GameBoard from './GameBoard';
 import GameInfo from './GameInfo';
+
 import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
 
 import blankGameBoard from "./blankGameBoard";
 import '../styles.css';
+
+const config = require('../config');
 
 class Game extends Component {
     constructor() {
@@ -25,8 +28,8 @@ class Game extends Component {
         const firstPiece = allTetrominos[Math.floor(Math.random() * 7)];
         const secondPiece = allTetrominos[Math.floor(Math.random() * 7)];
 
-        firstPiece.x = 5;
-        firstPiece.y = 0;
+        firstPiece.x = config.startingXPosition;
+        firstPiece.y = config.startingYPosition;
         this.setState({
             gameBoard: blankGameBoard,
             currentPiece: firstPiece,
@@ -51,12 +54,45 @@ class Game extends Component {
     updateGameBoard(gameBoard, currentPiece) {
         let newGameBoard = gameBoard;
 
-        // Determine new center point
-        newGameBoard[currentPiece.y][currentPiece.x] = currentPiece.color;
-
         // Draw piece around axis
-        let axis = currentPiece.piece[currentPiece.axis[0]][currentPiece.axis[1]];
+        const axisRelativeToPieceYPos = currentPiece.axis[0];
+        const axisRelativeToPieceXPos = currentPiece.axis[1];
+        const piece = currentPiece.piece;
 
+        for(let y = 0; y < currentPiece.piece.length; y++) {
+            for(let x = 0; x < currentPiece.piece[y].length; x++) {
+                if (piece[y][x] > 0) {
+                    let newYPos = 0;
+                    let newXPos = 0;
+ 
+                    // In order to ensure the difference between the realtive 
+                    // axis point and the current point in the loop is positive,
+                    // I need to check whether or not x/y is less than
+                    // or equal to the relative axis position in order
+                    // to determine the order of the elements
+
+                    if (y <= axisRelativeToPieceYPos) {
+                        let yDifference = axisRelativeToPieceYPos - y;
+                        newYPos = currentPiece.y - yDifference;
+                    }
+                    else {
+                        let yDifference = y - axisRelativeToPieceYPos;;
+                        newYPos = currentPiece.y + yDifference;
+                    }
+
+                    if (x <= axisRelativeToPieceXPos) {
+                        let xDifference = axisRelativeToPieceXPos - x;
+                        newXPos = currentPiece.x - xDifference;
+                    }
+                    else {
+                        let xDifference = x - axisRelativeToPieceXPos;
+                        newXPos = currentPiece.x + xDifference;
+                    }
+
+                    newGameBoard[newYPos][newXPos] = currentPiece.color;
+                }
+            }
+        }
         
         return newGameBoard;
     }
