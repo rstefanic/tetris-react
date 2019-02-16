@@ -2,8 +2,9 @@ import React from 'react';
 import TileRow from './TileRow';
 
 function GameBoard(props) {
+    let id = 1;
     const rowComponents = props.gameBoard.map(row => {
-        return <TileRow row={ row } />
+        return <TileRow row={ row } key={ id++ } />
     });
     
     return (
