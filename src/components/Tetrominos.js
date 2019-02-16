@@ -36,43 +36,51 @@ const lPiece = [
 ]
 
 export const iTetromino = {
-    axis: [2, 0],
+
+    axisPositionY: 2,
+    axisPositionX: 0,
     piece: iPiece,
     color: 1
 }
 
 export const oTetromino = {
-    axis: [0, 1],
+    axisPositionY: 0,
+    axisPositionX: 1,
     piece: oPiece,
     color: 2
 }
 
 export const tTetromino = {
-    axis: [1, 1],
+    axisPositionY: 1,
+    axisPositionX: 1,
     piece: tPiece,
     color: 3
 }
 
 export const sTetromino = {
-    axis: [0, 1],
+    axisPositionY: 0, 
+    axisPositionX: 1,
     piece: sPiece,
     color: 4
 }
 
 export const zTetromino = {
-    axis: [0, 1],
+    axisPositionY: 0,
+    axisPositionX: 1,
     piece: zPiece,
-    color: 5
+    color: 5 
 }
 
 export const jTetromino = {
-    axis: [1, 1],
+    axisPositionY: 1,
+    axisPositionX: 1,
     piece: jPiece,
     color: 6
 }
 
 export const lTetromino = {
-    axis: [1, 1],
+    axisPositionY: 1,
+    axisPositionX: 1,
     piece: lPiece,
     color: 7
 }

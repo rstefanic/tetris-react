@@ -15,6 +15,8 @@ function GameInfo(props) {
                 <fieldset>
                     <legend>Info</legend>
                     <p>Level: { props.level }</p>
+                    <p>Lines: { props.lines }</p>
+                    <p>Score: { props.score }</p>
                     <p>Time Elapsed: { props.timeElapsed }</p>
                 </fieldset>
             </div>

@@ -17,6 +17,8 @@ class Game extends Component {
             currentPiece: iTetromino,
             nextPiece: oTetromino,
             level: 1,
+            lines: 0,
+            score: 0,
             timeElapsed: 0
         }
 
@@ -40,6 +42,15 @@ class Game extends Component {
     }
 
     gameLoop() {
+
+        // Get User Input
+        // Check collision detection
+            // Set Piece if move is valid
+        // Apply Gravity
+        // Clear any lines if applicable
+
+        // Update Score
+        // Render Piece to Screen
         this.setState(prevState => {
             const updatedGameBoard = this.updateGameBoard(prevState.gameBoard, prevState.currentPiece);
 
@@ -55,13 +66,18 @@ class Game extends Component {
         let newGameBoard = gameBoard;
 
         // Draw piece around axis
-        const axisRelativeToPieceYPos = currentPiece.axis[0];
-        const axisRelativeToPieceXPos = currentPiece.axis[1];
-        const piece = currentPiece.piece;
+        const axisRelativeToPieceYPos = currentPiece.axisPositionY;
+        const axisRelativeToPieceXPos = currentPiece.axisPositionX; 
 
         for(let y = 0; y < currentPiece.piece.length; y++) {
+
+            // Only draw the piece if it's visible on the gameboard
+            if (y < axisRelativeToPieceYPos) {
+                continue; 
+            }
+
             for(let x = 0; x < currentPiece.piece[y].length; x++) {
-                if (piece[y][x] > 0) {
+                if (currentPiece.piece[y][x] > 0) {
                     let newYPos = 0;
                     let newXPos = 0;
  
@@ -108,7 +124,9 @@ class Game extends Component {
                     <GameInfo 
                         level={ this.state.level }
                         time={ this.state.timeElapsed }
-                        nextPiece= { this.state.nextPiece }
+                        nextPiece={ this.state.nextPiece }
+                        lines={ this.state.lines }
+                        score={ this.state.score }
                     />
                 </div>
             </div>
