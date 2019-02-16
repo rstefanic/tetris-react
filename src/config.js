@@ -1,2 +1,2 @@
 export const startingXPosition = 5;
-export const startingYPosition = 10;
+export const startingYPosition = 0;

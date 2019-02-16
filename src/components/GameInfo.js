@@ -2,7 +2,8 @@ import React from 'react';
 import TileRow from './TileRow';
 
 function GameInfo(props) {
-    const nextPieceDisplay = props.nextPiece.piece.map(row => <TileRow row={ row }/>);
+    let id = 1;
+    const nextPieceDisplay = props.nextPiece.piece.map(row => <TileRow row={ row } key={ id++ } />);
 
     return (
         <div className="half">
