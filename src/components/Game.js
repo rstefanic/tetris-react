@@ -24,46 +24,117 @@ class Game extends Component {
 
         this.gameLoop = this.gameLoop.bind(this);
         this.updateGameBoard = this.updateGameBoard.bind(this);
+        this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.movePieceDown = this.movePieceDown.bind(this);
+        this.movePieceLeft = this.movePieceLeft.bind(this);
+        this.movePieceRight = this.movePieceRight.bind(this);
+        this.hardDropPiece = this.hardDropPiece.bind(this);
+        this.rotatePieceRight = this.rotatePieceRight.bind(this);
     }
 
     componentDidMount() {
+
+        document.addEventListener('keydown', this.handleKeyPress);
+
         const firstPiece = allTetrominos[Math.floor(Math.random() * 7)];
         const secondPiece = allTetrominos[Math.floor(Math.random() * 7)];
 
         firstPiece.x = config.startingXPosition;
         firstPiece.y = config.startingYPosition;
+        firstPiece.previousX = firstPiece.x;
+        firstPiece.previousY = firstPiece.y;
+
         this.setState({
             gameBoard: blankGameBoard,
             currentPiece: firstPiece,
             nextPiece: secondPiece
         });
 
-        setInterval(this.gameLoop(), 1000);
+        setInterval(this.gameLoop, 1000);
+    }
+
+    handleKeyPress(event) {
+        const keys = {
+            w: 87,
+            a: 65,
+            s: 83,
+            d: 68,
+            space: 32,
+            slash: 191
+        };
+
+        if (event.keyCode === keys.a) {
+            this.movePieceLeft();
+        }
+        else if (event.keyCode === keys.d) {
+            this.movePieceRight();
+        }
+        else if (event.keyCode === keys.s) {
+            this.movePieceDown();
+        }
+        else if (event.keyCode === keys.space) {
+            this.hardDropPiece();
+        }
+        else if (event.keyCode === keys.slash) {
+            this.rotatePieceRight();
+        }
+    }
+
+    movePieceLeft() {
+        console.log("Move left!");
+    }
+
+    movePieceRight() {
+        console.log("Move Right!");
+    }
+
+    movePieceDown() {
+        console.log("Move Down!");
+    }
+
+    hardDropPiece() {
+        console.log("Drop Piece!");
+    }
+
+    rotatePieceRight() {
+        console.log("Roate Piece Right!");
+    }
+
+    checkIfValidMove() {
+        this.setState(prevState => {
+           const oldBoard = prevState.gameBoard.map(row => {
+                return row.map(grid => grid);
+           });
+
+           let updateSuccess = this.updateGameBoard(prevState.gameBoard, prevState.currentPiece);
+
+           return {
+                gameBoard: updateSuccess ? prevState.gameBoard : oldBoard
+           };
+        });
     }
 
     gameLoop() {
-
-        // Get User Input
-        // Check collision detection
-            // Set Piece if move is valid
         // Apply Gravity
         // Clear any lines if applicable
 
         // Update Score
         // Render Piece to Screen
         this.setState(prevState => {
-            const updatedGameBoard = this.updateGameBoard(prevState.gameBoard, prevState.currentPiece);
+            const updatedGameBoard = prevState.gameBoard.map((row) => { return row.map(() => 0);
+            });
 
+            this.updateGameBoard(updatedGameBoard, prevState.currentPiece);
+
+            let piece = prevState.currentPiece;
             return { 
-                gameBoard: updatedGameBoard,
-                currentPiece: prevState.currentPiece,
-                nextPiece: prevState.nextPiece
+                gameBoard: prevState.gameBoard,
+                currentPiece: piece
             };
         });
     }
 
     updateGameBoard(gameBoard, currentPiece) {
-        let newGameBoard = gameBoard;
 
         // Draw piece around axis
         const axisRelativeToPieceYPos = currentPiece.axisPositionY;
@@ -78,6 +149,11 @@ class Game extends Component {
 
             for(let x = 0; x < currentPiece.piece[y].length; x++) {
                 if (currentPiece.piece[y][x] > 0) {
+
+                    if (gameBoard[y][x] !== 0 || gameBoard[y][x] !== currentPiece.color) {
+                        return false;
+                    }
+
                     let newYPos = 0;
                     let newXPos = 0;
  
@@ -105,12 +181,12 @@ class Game extends Component {
                         newXPos = currentPiece.x + xDifference;
                     }
 
-                    newGameBoard[newYPos][newXPos] = currentPiece.color;
+                    gameBoard[newYPos][newXPos] = currentPiece.color;
                 }
             }
         }
         
-        return newGameBoard;
+        return true;
     }
 
     render() {

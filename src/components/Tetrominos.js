@@ -36,7 +36,6 @@ const lPiece = [
 ]
 
 export const iTetromino = {
-
     axisPositionY: 2,
     axisPositionX: 0,
     piece: iPiece,
