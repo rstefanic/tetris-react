@@ -32,10 +32,10 @@ class Game extends Component {
         this.rotatePiece = this.rotatePiece.bind(this);
         this.movePiece = this.movePiece.bind(this);
         this.checkForCollision = this.checkForCollision.bind(this);
+        this.clearAnyLines = this.clearAnyLines.bind(this);
     }
 
     componentDidMount() {
-
         document.addEventListener('keydown', this.handleKeyPress);
 
         const firstPiece = allTetrominos[Math.floor(Math.random() * 7)];
@@ -70,6 +70,8 @@ class Game extends Component {
             a: 65,
             s: 83,
             d: 68,
+            leftArrow: 37,
+            rightArrow: 39,
             space: 32,
             slash: 191
         };
@@ -86,8 +88,14 @@ class Game extends Component {
         else if (event.keyCode === keys.space) {
             this.hardDropPiece();
         }
-        else if (event.keyCode === keys.w || event.keyCode === keys.slash) {
+        else if (event.keyCode === keys.w || event.keyCode === keys.space) {
+            this.hardDropPiece();
+        }
+        else if (event.keyCode === keys.rightArrow) {
             this.rotatePiece(true);
+        }
+        else if (event.keyCode === keys.leftArrow) {
+            this.rotatePiece(false);
         }
     }
 
@@ -114,44 +122,38 @@ class Game extends Component {
         // Move Y up once to see if piece can be rotated;
         // if it cannot be rotated after that, then do not rotate
 
-        this.setState(prevState => {
-            let orientation = prevState.currentPiece.orientation;
+        let orientation = this.state.currentPiece.orientation;
 
-            turnRight ? orientation++ : orientation--;
+        turnRight ? orientation++ : orientation--;
 
-            // If it's fully turned right, turn it to position 0
-            if (orientation > 3) {
-                orientation = 0;
-            }
+        // If it's fully turned right, turn it to position 0
+        if (orientation > 3) {
+            orientation = 0;
+        }
 
-            // If it's fully turned left, turn it to position 3
-            if (orientation < 0) {
-                orientation = 3;
-            }
+        // If it's fully turned left, turn it to position 3
+        if (orientation < 0) {
+            orientation = 3;
+        }
 
-            let rotatedPiece = prevState.currentPiece;
-            rotatedPiece.orientation = orientation;
+        let rotatedPiece = this.state.currentPiece;
+        rotatedPiece.orientation = orientation;
 
-            return {
-                currentPiece: rotatedPiece
-            };
-        });
+        let collision = this.checkForCollision(
+            this.state.currentPiece.y, 
+            this.state.currentPiece.x, 
+            rotatedPiece
+        );
 
-        this.draw();
-    }
+        if (!collision) {
+            this.setState(prevState => {
+                return {
+                    currentPiece: rotatedPiece
+                };
+            });
 
-    checkIfValidMove() {
-        this.setState(prevState => {
-           const oldBoard = prevState.gameBoard.map(row => {
-                return row.map(grid => grid);
-           });
-
-           let updateSuccess = this.updateGameBoard(prevState.gameBoard, prevState.currentPiece);
-
-           return {
-                gameBoard: updateSuccess ? prevState.gameBoard : oldBoard
-           };
-        });
+            this.draw();
+        }
     }
 
     gameLoop() {
@@ -159,6 +161,7 @@ class Game extends Component {
         this.movePiece(1, 0);
 
         // Clear any lines if applicable
+        this.clearAnyLines();
 
         // Update Score
 
@@ -172,7 +175,7 @@ class Game extends Component {
             let newYPos = prevState.currentPiece.y + y;
             let newXPos = prevState.currentPiece.x + x;
 
-            let collision = this.checkForCollision(newYPos, newXPos);
+            let collision = this.checkForCollision(newYPos, newXPos, prevState.currentPiece);
 
             if (!collision) {
                 prevState.currentPiece.y += y;
@@ -181,6 +184,33 @@ class Game extends Component {
 
             return { 
                 currentPiece: prevState.currentPiece
+            };
+        });
+    }
+
+    clearAnyLines() {
+        let currentGameBoard = this.state.gameBoard;
+
+        let linesToClear = [];
+
+        for (let i = 0; i < currentGameBoard.length; i++) {
+            let row = currentGameBoard[i].filter(value => value !== 0);
+            if (row.length === 10) {
+                linesToClear.push(i);
+            }
+        }
+
+        for(let i = 0; i < linesToClear.length; i++) {
+            currentGameBoard.splice(linesToClear[i], 1);
+        }
+
+        linesToClear.forEach(x => {
+            currentGameBoard.unshift([Array(10).fill(0)]);
+        })
+
+        this.setState(prevState => {
+            return {
+                gameBoard: currentGameBoard
             };
         });
     }
@@ -197,10 +227,10 @@ class Game extends Component {
         });
     }
 
-    checkForCollision(yTestPosition, xTestPosition) {
-        const axisRelativeToPieceYPos = this.state.currentPiece.axisPositionY();
-        const axisRelativeToPieceXPos = this.state.currentPiece.axisPositionX(); 
-        const orientation = this.state.currentPiece.orientation;
+    checkForCollision(yTestPosition, xTestPosition, piece) {
+        const axisRelativeToPieceYPos = piece.axisPositionY();
+        const axisRelativeToPieceXPos = piece.axisPositionX(); 
+        const orientation = piece.orientation;
 
         let currentGameBoard = this.state.gameBoard;
         this.state.previousPointsDrawn.forEach(points => {
