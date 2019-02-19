@@ -3,7 +3,7 @@ import TileRow from './TileRow';
 
 function GameInfo(props) {
     let id = 1;
-    const nextPieceDisplay = props.nextPiece.piece.map(row => <TileRow row={ row } key={ id++ } />);
+    const nextPieceDisplay = props.nextPiece.piece[0].map(row => <TileRow row={ row } key={ id++ } />);
 
     return (
         <div className="half">

@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
+import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
+import blankGameBoard from "./blankGameBoard";
 import GameBoard from './GameBoard';
 import GameInfo from './GameInfo';
-
-import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
-
-import blankGameBoard from "./blankGameBoard";
 import '../styles.css';
 
 const config = require('../config');
@@ -31,7 +29,7 @@ class Game extends Component {
         this.movePieceLeft = this.movePieceLeft.bind(this);
         this.movePieceRight = this.movePieceRight.bind(this);
         this.hardDropPiece = this.hardDropPiece.bind(this);
-        this.rotatePieceRight = this.rotatePieceRight.bind(this);
+        this.rotatePiece = this.rotatePiece.bind(this);
         this.movePiece = this.movePiece.bind(this);
         this.checkForCollision = this.checkForCollision.bind(this);
     }
@@ -89,7 +87,7 @@ class Game extends Component {
             this.hardDropPiece();
         }
         else if (event.keyCode === keys.w || event.keyCode === keys.slash) {
-            this.rotatePieceRight();
+            this.rotatePiece(true);
         }
     }
 
@@ -112,22 +110,33 @@ class Game extends Component {
         console.log("Drop Piece!");
     }
 
-    rotatePieceRight() {
+    rotatePiece(turnRight) {
         // Move Y up once to see if piece can be rotated;
         // if it cannot be rotated after that, then do not rotate
 
-        // TODO: Fix rotate -- currently broken
         this.setState(prevState => {
+            let orientation = prevState.currentPiece.orientation;
+
+            turnRight ? orientation++ : orientation--;
+
+            // If it's fully turned right, turn it to position 0
+            if (orientation > 3) {
+                orientation = 0;
+            }
+
+            // If it's fully turned left, turn it to position 3
+            if (orientation < 0) {
+                orientation = 3;
+            }
+
             let rotatedPiece = prevState.currentPiece;
-            rotatedPiece.piece = rotatedPiece.piece.map((col, i) => rotatedPiece.piece.map(row => row[i]));
-            let x = rotatedPiece.axisPositionX;
-            let y = rotatedPiece.axisPositionY;
-            rotatedPiece.axisPositionX = y;
-            rotatedPiece.axisPositionY = x;
+            rotatedPiece.orientation = orientation;
+
             return {
                 currentPiece: rotatedPiece
             };
         });
+
         this.draw();
     }
 
@@ -189,17 +198,18 @@ class Game extends Component {
     }
 
     checkForCollision(yTestPosition, xTestPosition) {
-        const axisRelativeToPieceYPos = this.state.currentPiece.axisPositionY;
-        const axisRelativeToPieceXPos = this.state.currentPiece.axisPositionX; 
+        const axisRelativeToPieceYPos = this.state.currentPiece.axisPositionY();
+        const axisRelativeToPieceXPos = this.state.currentPiece.axisPositionX(); 
+        const orientation = this.state.currentPiece.orientation;
 
         let currentGameBoard = this.state.gameBoard;
         this.state.previousPointsDrawn.forEach(points => {
             currentGameBoard[points.y][points.x] = 0;
         });
 
-        for(let y = 0; y < this.state.currentPiece.piece.length; y++) {
-            for(let x = 0; x < this.state.currentPiece.piece[y].length; x++) {
-                if (this.state.currentPiece.piece[y][x] > 0 &&
+        for(let y = 0; y < this.state.currentPiece.piece[orientation].length; y++) {
+            for(let x = 0; x < this.state.currentPiece.piece[orientation][y].length; x++) {
+                if (this.state.currentPiece.piece[orientation][y][x] > 0 &&
                     this.state.previousPointsDrawn.x !== x &&
                     this.state.previousPointsDrawn.y !== y) {
 
@@ -251,16 +261,17 @@ class Game extends Component {
 
     updateGameBoard(gameBoard, currentPiece, oldDrawingPoints, newDrawingPoints) {
         // Draw piece around axis
-        const axisRelativeToPieceYPos = currentPiece.axisPositionY;
-        const axisRelativeToPieceXPos = currentPiece.axisPositionX; 
+        const axisRelativeToPieceYPos = currentPiece.axisPositionY();
+        const axisRelativeToPieceXPos = currentPiece.axisPositionX(); 
+        const orientation = currentPiece.orientation;
 
         oldDrawingPoints.forEach(points => {
             gameBoard[points.y][points.x] = 0;
         });
 
-        for(let y = 0; y < currentPiece.piece.length; y++) {
-            for(let x = 0; x < currentPiece.piece[y].length; x++) {
-                if (currentPiece.piece[y][x] > 0) {
+        for(let y = 0; y < currentPiece.piece[orientation].length; y++) {
+            for(let x = 0; x < currentPiece.piece[orientation][y].length; x++) {
+                if (currentPiece.piece[orientation][y][x] > 0) {
 
                     let newYPos = 0;
                     let newXPos = 0;
