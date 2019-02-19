@@ -14,6 +14,7 @@ class Game extends Component {
         super();
         this.state = {
             gameBoard: [],
+            previousPointsDrawn: [],
             currentPiece: iTetromino,
             nextPiece: oTetromino,
             level: 1,
@@ -23,6 +24,7 @@ class Game extends Component {
         }
 
         this.gameLoop = this.gameLoop.bind(this);
+        this.timer = this.timer.bind(this);
         this.updateGameBoard = this.updateGameBoard.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.movePieceDown = this.movePieceDown.bind(this);
@@ -30,6 +32,8 @@ class Game extends Component {
         this.movePieceRight = this.movePieceRight.bind(this);
         this.hardDropPiece = this.hardDropPiece.bind(this);
         this.rotatePieceRight = this.rotatePieceRight.bind(this);
+        this.movePiece = this.movePiece.bind(this);
+        this.checkForCollision = this.checkForCollision.bind(this);
     }
 
     componentDidMount() {
@@ -51,6 +55,15 @@ class Game extends Component {
         });
 
         setInterval(this.gameLoop, 1000);
+        setInterval(this.timer, 1000);
+    }
+
+    timer() {
+        this.setState(prevState => {
+            return {
+                timeElapsed: prevState.timeElapsed + 1
+            };
+        });
     }
 
     handleKeyPress(event) {
@@ -75,21 +88,24 @@ class Game extends Component {
         else if (event.keyCode === keys.space) {
             this.hardDropPiece();
         }
-        else if (event.keyCode === keys.slash) {
+        else if (event.keyCode === keys.w || event.keyCode === keys.slash) {
             this.rotatePieceRight();
         }
     }
 
     movePieceLeft() {
-        console.log("Move left!");
+        this.movePiece(0, -1);
+        this.draw();
     }
 
     movePieceRight() {
-        console.log("Move Right!");
+        this.movePiece(0, 1);
+        this.draw();
     }
 
     movePieceDown() {
-        console.log("Move Down!");
+        this.movePiece(1, 0);
+        this.draw();
     }
 
     hardDropPiece() {
@@ -97,7 +113,22 @@ class Game extends Component {
     }
 
     rotatePieceRight() {
-        console.log("Roate Piece Right!");
+        // Move Y up once to see if piece can be rotated;
+        // if it cannot be rotated after that, then do not rotate
+
+        // TODO: Fix rotate -- currently broken
+        this.setState(prevState => {
+            let rotatedPiece = prevState.currentPiece;
+            rotatedPiece.piece = rotatedPiece.piece.map((col, i) => rotatedPiece.piece.map(row => row[i]));
+            let x = rotatedPiece.axisPositionX;
+            let y = rotatedPiece.axisPositionY;
+            rotatedPiece.axisPositionX = y;
+            rotatedPiece.axisPositionY = x;
+            return {
+                currentPiece: rotatedPiece
+            };
+        });
+        this.draw();
     }
 
     checkIfValidMove() {
@@ -116,43 +147,120 @@ class Game extends Component {
 
     gameLoop() {
         // Apply Gravity
+        this.movePiece(1, 0);
+
         // Clear any lines if applicable
 
         // Update Score
-        // Render Piece to Screen
+
+        // Draw screen
+        this.draw();
+    }
+
+    movePiece(y, x) {
         this.setState(prevState => {
-            const updatedGameBoard = prevState.gameBoard.map((row) => { return row.map(() => 0);
-            });
 
-            this.updateGameBoard(updatedGameBoard, prevState.currentPiece);
+            let newYPos = prevState.currentPiece.y + y;
+            let newXPos = prevState.currentPiece.x + x;
 
-            let piece = prevState.currentPiece;
+            let collision = this.checkForCollision(newYPos, newXPos);
+
+            if (!collision) {
+                prevState.currentPiece.y += y;
+                prevState.currentPiece.x += x;
+            }
+
             return { 
-                gameBoard: prevState.gameBoard,
-                currentPiece: piece
+                currentPiece: prevState.currentPiece
             };
         });
     }
 
-    updateGameBoard(gameBoard, currentPiece) {
+    draw() {
+        this.setState(prevState => {
+            let newPoints = [];
+            this.updateGameBoard(prevState.gameBoard, prevState.currentPiece, prevState.previousPointsDrawn, newPoints);
 
+            return { 
+                gameBoard: prevState.gameBoard,
+                previousPointsDrawn: newPoints
+            };
+        });
+    }
+
+    checkForCollision(yTestPosition, xTestPosition) {
+        const axisRelativeToPieceYPos = this.state.currentPiece.axisPositionY;
+        const axisRelativeToPieceXPos = this.state.currentPiece.axisPositionX; 
+
+        let currentGameBoard = this.state.gameBoard;
+        this.state.previousPointsDrawn.forEach(points => {
+            currentGameBoard[points.y][points.x] = 0;
+        });
+
+        for(let y = 0; y < this.state.currentPiece.piece.length; y++) {
+            for(let x = 0; x < this.state.currentPiece.piece[y].length; x++) {
+                if (this.state.currentPiece.piece[y][x] > 0 &&
+                    this.state.previousPointsDrawn.x !== x &&
+                    this.state.previousPointsDrawn.y !== y) {
+
+                    let newYPos = 0;
+                    let newXPos = 0;
+ 
+                    // In order to ensure the difference between the realtive 
+                    // axis point and the current point in the loop is positive,
+                    // I need to check whether or not x/y is less than
+                    // or equal to the relative axis position in order
+                    // to determine the order of the elements
+
+                    if (y <= axisRelativeToPieceYPos) {
+                        let yDifference = axisRelativeToPieceYPos - y;
+                        newYPos = yTestPosition - yDifference;
+                    }
+                    else {
+                        let yDifference = y - axisRelativeToPieceYPos;;
+                        newYPos = yTestPosition + yDifference;
+                    }
+
+                    if (x <= axisRelativeToPieceXPos) {
+                        let xDifference = axisRelativeToPieceXPos - x;
+                        newXPos = xTestPosition - xDifference;
+                    }
+                    else {
+                        let xDifference = x - axisRelativeToPieceXPos;
+                        newXPos = xTestPosition + xDifference;
+                    }
+                    
+                    // Catch out of bounds
+                    if (newYPos < 0 || newYPos > 19 ||
+                        newXPos < 0 || newXPos > 9) {
+                            console.log("Out of Bounds");
+                            return true;
+                    }
+
+                    // react complaint here
+                    if (currentGameBoard[newYPos][newXPos] > 0) {
+                        console.log("space occupied");
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    updateGameBoard(gameBoard, currentPiece, oldDrawingPoints, newDrawingPoints) {
         // Draw piece around axis
         const axisRelativeToPieceYPos = currentPiece.axisPositionY;
         const axisRelativeToPieceXPos = currentPiece.axisPositionX; 
 
+        oldDrawingPoints.forEach(points => {
+            gameBoard[points.y][points.x] = 0;
+        });
+
         for(let y = 0; y < currentPiece.piece.length; y++) {
-
-            // Only draw the piece if it's visible on the gameboard
-            if (y < axisRelativeToPieceYPos) {
-                continue; 
-            }
-
             for(let x = 0; x < currentPiece.piece[y].length; x++) {
                 if (currentPiece.piece[y][x] > 0) {
-
-                    if (gameBoard[y][x] !== 0 || gameBoard[y][x] !== currentPiece.color) {
-                        return false;
-                    }
 
                     let newYPos = 0;
                     let newXPos = 0;
@@ -181,12 +289,13 @@ class Game extends Component {
                         newXPos = currentPiece.x + xDifference;
                     }
 
-                    gameBoard[newYPos][newXPos] = currentPiece.color;
+                    if (newYPos > -1) {
+                        gameBoard[newYPos][newXPos] = currentPiece.color;
+                        newDrawingPoints.push({y: newYPos, x: newXPos});
+                    }
                 }
             }
         }
-        
-        return true;
     }
 
     render() {
@@ -203,6 +312,7 @@ class Game extends Component {
                         nextPiece={ this.state.nextPiece }
                         lines={ this.state.lines }
                         score={ this.state.score }
+                        timeElapsed={ this.state.timeElapsed }
                     />
                 </div>
             </div>
