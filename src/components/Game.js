@@ -18,7 +18,8 @@ class Game extends Component {
             level: 1,
             lines: 0,
             score: 0,
-            timeElapsed: 0
+            timeElapsed: 0,
+            pieceInSamePos: 0
         }
 
         this.gameLoop = this.gameLoop.bind(this);
@@ -43,8 +44,6 @@ class Game extends Component {
 
         firstPiece.x = config.startingXPosition;
         firstPiece.y = config.startingYPosition;
-        firstPiece.previousX = firstPiece.x;
-        firstPiece.previousY = firstPiece.y;
 
         this.setState({
             gameBoard: blankGameBoard,
@@ -146,6 +145,9 @@ class Game extends Component {
         );
 
         if (!collision) {
+            console.log(collision);
+            console.log("Changing!");
+            console.log(this.state.currentPiece);
             this.setState(prevState => {
                 return {
                     currentPiece: rotatedPiece
@@ -157,11 +159,15 @@ class Game extends Component {
     }
 
     gameLoop() {
-        // Apply Gravity
-        this.movePiece(1, 0);
+        if (this.state.pieceInSamePos === 3) {
+            this.setCurrentPiece();
+        }
 
         // Clear any lines if applicable
         this.clearAnyLines();
+
+        // Apply Gravity
+        this.movePiece(1, 0);
 
         // Update Score
 
@@ -169,8 +175,32 @@ class Game extends Component {
         this.draw();
     }
 
+    setCurrentPiece() {
+       this.setState(prevState => {
+            let newCurrentPiece = prevState.nextPiece;
+            newCurrentPiece.orientation = 0;
+
+            return {
+                pieceInSamePos: 0,
+                currentPiece: newCurrentPiece
+            };
+       });
+
+       this.getNextPiece();
+    }
+
+    getNextPiece() {
+       this.setState(prevState => {
+            const newNextPiece = allTetrominos[Math.floor(Math.random() * 7)];
+            return {
+                nextPiece: newNextPiece
+            }
+       });
+    }
+
     movePiece(y, x) {
         this.setState(prevState => {
+            let pieceInSamePos = prevState.pieceInSamePos;
 
             let newYPos = prevState.currentPiece.y + y;
             let newXPos = prevState.currentPiece.x + x;
@@ -181,9 +211,13 @@ class Game extends Component {
                 prevState.currentPiece.y += y;
                 prevState.currentPiece.x += x;
             }
+            else {
+                pieceInSamePos++;
+            }
 
             return { 
-                currentPiece: prevState.currentPiece
+                currentPiece: prevState.currentPiece,
+                pieceInSamePos: pieceInSamePos
             };
         });
     }
@@ -227,19 +261,19 @@ class Game extends Component {
         });
     }
 
-    checkForCollision(yTestPosition, xTestPosition, piece) {
-        const axisRelativeToPieceYPos = piece.axisPositionY();
-        const axisRelativeToPieceXPos = piece.axisPositionX(); 
-        const orientation = piece.orientation;
+    checkForCollision(yTestPosition, xTestPosition, testPiece) {
+        const axisRelativeToPieceYPos = testPiece.axisPositionY();
+        const axisRelativeToPieceXPos = testPiece.axisPositionX(); 
+        const orientation = testPiece.orientation;
 
         let currentGameBoard = this.state.gameBoard;
         this.state.previousPointsDrawn.forEach(points => {
             currentGameBoard[points.y][points.x] = 0;
         });
 
-        for(let y = 0; y < this.state.currentPiece.piece[orientation].length; y++) {
-            for(let x = 0; x < this.state.currentPiece.piece[orientation][y].length; x++) {
-                if (this.state.currentPiece.piece[orientation][y][x] > 0 &&
+        for(let y = 0; y < testPiece.piece[orientation].length; y++) {
+            for(let x = 0; x < testPiece.piece[orientation][y].length; x++) {
+                if (testPiece.piece[orientation][y][x] > 0 &&
                     this.state.previousPointsDrawn.x !== x &&
                     this.state.previousPointsDrawn.y !== y) {
 
