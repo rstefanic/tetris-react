@@ -159,42 +159,33 @@ class Game extends Component {
     }
 
     gameLoop() {
-        if (this.state.pieceInSamePos === 3) {
+        if (this.state.pieceInSamePos > 2) {
             this.setCurrentPiece();
+            this.clearAnyLines();
         }
-
-        // Clear any lines if applicable
-        this.clearAnyLines();
 
         // Apply Gravity
         this.movePiece(1, 0);
 
         // Update Score
-
-        // Draw screen
-        this.draw();
     }
 
     setCurrentPiece() {
-       this.setState(prevState => {
-            let newCurrentPiece = prevState.nextPiece;
+        this.setState(prevState => {
+            const newCurrentPiece = prevState.nextPiece;
+            newCurrentPiece.x = config.startingXPosition;
+            newCurrentPiece.y = config.startingYPosition;
             newCurrentPiece.orientation = 0;
+
+            const newNextPiece = allTetrominos[Math.floor(Math.random() * 7)];
+            newNextPiece.orientation = 0;
 
             return {
                 pieceInSamePos: 0,
-                currentPiece: newCurrentPiece
-            };
-       });
-
-       this.getNextPiece();
-    }
-
-    getNextPiece() {
-       this.setState(prevState => {
-            const newNextPiece = allTetrominos[Math.floor(Math.random() * 7)];
-            return {
+                previousPointsDrawn: [],
+                currentPiece: newCurrentPiece,
                 nextPiece: newNextPiece
-            }
+            };
        });
     }
 
@@ -210,6 +201,7 @@ class Game extends Component {
             if (!collision) {
                 prevState.currentPiece.y += y;
                 prevState.currentPiece.x += x;
+                pieceInSamePos = 0;
             }
             else {
                 pieceInSamePos++;
@@ -220,6 +212,8 @@ class Game extends Component {
                 pieceInSamePos: pieceInSamePos
             };
         });
+
+        this.draw();
     }
 
     clearAnyLines() {
@@ -239,7 +233,7 @@ class Game extends Component {
         }
 
         linesToClear.forEach(x => {
-            currentGameBoard.unshift([Array(10).fill(0)]);
+            currentGameBoard.unshift(Array(10).fill(0));
         })
 
         this.setState(prevState => {
@@ -262,6 +256,10 @@ class Game extends Component {
     }
 
     checkForCollision(yTestPosition, xTestPosition, testPiece) {
+        // While this is similar to updateGameBoard, this function is 
+        // fundementally different because it's checking if a collision 
+        // will occur instead of updating the gameboard.
+
         const axisRelativeToPieceYPos = testPiece.axisPositionY();
         const axisRelativeToPieceXPos = testPiece.axisPositionX(); 
         const orientation = testPiece.orientation;
@@ -280,11 +278,7 @@ class Game extends Component {
                     let newYPos = 0;
                     let newXPos = 0;
  
-                    // In order to ensure the difference between the realtive 
-                    // axis point and the current point in the loop is positive,
-                    // I need to check whether or not x/y is less than
-                    // or equal to the relative axis position in order
-                    // to determine the order of the elements
+                    // Calculate the absolute difference between X and Y
 
                     if (y <= axisRelativeToPieceYPos) {
                         let yDifference = axisRelativeToPieceYPos - y;
@@ -311,7 +305,7 @@ class Game extends Component {
                             return true;
                     }
 
-                    // react complaint here
+                    // Catch if the piece is alrady occupied
                     if (currentGameBoard[newYPos][newXPos] > 0) {
                         console.log("space occupied");
                         return true;
@@ -341,7 +335,7 @@ class Game extends Component {
                     let newXPos = 0;
  
                     // In order to ensure the difference between the realtive 
-                    // axis point and the current point in the loop is positive,
+                    // axis point and the current point in the loop is absolute,
                     // I need to check whether or not x/y is less than
                     // or equal to the relative axis position in order
                     // to determine the order of the elements
