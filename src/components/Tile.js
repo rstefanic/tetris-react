@@ -7,7 +7,7 @@ function Tile(props) {
             styles = { "backgroundColor": "steelblue" };
             break; 
         case 2: 
-            styles = { "backgroundColor": "yellow" };
+            styles = { "backgroundColor": "lightsalmon" };
             break;
         case 3: 
             styles = { "backgroundColor": "purple" };
