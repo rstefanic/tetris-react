@@ -33,7 +33,8 @@ class Game extends Component {
         this.rotatePiece = this.rotatePiece.bind(this);
         this.movePiece = this.movePiece.bind(this);
         this.checkForCollision = this.checkForCollision.bind(this);
-        this.clearAnyLines = this.clearAnyLines.bind(this);
+        this.clearAnyLinesAndUpdateScore = this.clearAnyLinesAndUpdateScore.bind(this);
+        this.setLevel = this.setLevel.bind(this);
     }
 
     componentDidMount() {
@@ -161,13 +162,12 @@ class Game extends Component {
     gameLoop() {
         if (this.state.pieceInSamePos > 2) {
             this.setCurrentPiece();
-            this.clearAnyLines();
+            this.clearAnyLinesAndUpdateScore();
+            this.setLevel();
         }
 
         // Apply Gravity
         this.movePiece(1, 0);
-
-        // Update Score
     }
 
     setCurrentPiece() {
@@ -216,7 +216,7 @@ class Game extends Component {
         this.draw();
     }
 
-    clearAnyLines() {
+    clearAnyLinesAndUpdateScore() {
         let currentGameBoard = this.state.gameBoard;
 
         let linesToClear = [];
@@ -236,9 +236,48 @@ class Game extends Component {
             currentGameBoard.unshift(Array(10).fill(0));
         })
 
+        const linesCleared = linesToClear.length;
+
         this.setState(prevState => {
+
+            let pointsEarned = 0; 
+            switch (linesCleared) {
+                case 1:
+                    pointsEarned = 40 * prevState.level;
+                    break;
+                case 2:
+                    pointsEarned = 100 * prevState.level;
+                    break;
+                case 3:
+                    pointsEarned = 300 * prevState.level;
+                    break;
+                case 4:
+                    pointsEarned = 1200 * prevState.level;
+                    break;
+                default:
+                    break;
+            }
+
             return {
-                gameBoard: currentGameBoard
+                gameBoard: currentGameBoard,
+                lines: prevState.lines + linesCleared,
+                score: prevState.score + pointsEarned
+            };
+        });
+    }
+
+    setLevel() {
+        this.setState(prevState => {
+            const lines = prevState.lines;
+
+            let level = Math.floor(lines / 10);
+
+            if (level < 1) {
+                level = 1;
+            }
+
+            return {
+                level: level
             };
         });
     }
