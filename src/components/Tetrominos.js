@@ -229,7 +229,7 @@ export const zTetromino = {
 export const jTetromino = {
     orientation: 0,
     axisPositionY: function() {
-        if (this.orientation === 3) {
+        if (this.orientation === 2) {
             return 0;
         }
         else {
@@ -237,7 +237,7 @@ export const jTetromino = {
         }
     },
     axisPositionX: function() {
-        if (this.orientation === 3) {
+        if (this.orientation === 1) {
             return 0;
         }
         else {
@@ -251,7 +251,7 @@ export const jTetromino = {
 export const lTetromino = {
     orientation: 0,
     axisPositionY: function() {
-        if (this.orientation === 3) {
+        if (this.orientation === 2) {
             return 0;
         }
         else {
@@ -259,7 +259,7 @@ export const lTetromino = {
         }
     },
     axisPositionX: function() {
-        if (this.orientation === 3) {
+        if (this.orientation === 1) {
             return 0;
         }
         else {
