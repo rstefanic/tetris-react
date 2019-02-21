@@ -3,6 +3,8 @@ import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
 import blankGameBoard from "./blankGameBoard";
 import GameBoard from './GameBoard';
 import GameInfo from './GameInfo';
+import PauseScreen from './PauseScreen';
+
 import '../styles.css';
 
 const config = require('../config');
@@ -19,13 +21,18 @@ class Game extends Component {
             lines: 0,
             score: 0,
             timeElapsed: 0,
-            pieceInSamePos: 0
+            pieceInSamePos: 0,
+            gameIsPaused: false,
+            gameLoop: {},
+            timer: {}
         }
 
+        this.startGame = this.startGame.bind(this);
         this.gameLoop = this.gameLoop.bind(this);
         this.timer = this.timer.bind(this);
         this.updateGameBoard = this.updateGameBoard.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.pauseGame = this.pauseGame.bind(this);
         this.movePieceDown = this.movePieceDown.bind(this);
         this.movePieceLeft = this.movePieceLeft.bind(this);
         this.movePieceRight = this.movePieceRight.bind(this);
@@ -52,8 +59,15 @@ class Game extends Component {
             nextPiece: secondPiece
         });
 
-        setInterval(this.gameLoop, 1000);
-        setInterval(this.timer, 1000);
+        this.startGame();
+    }
+
+    startGame() {
+        const gameSpeed = (1000 * 2) / this.state.level;
+        this.setState({
+            gameLoop: setInterval(this.gameLoop, gameSpeed),
+            timer: setInterval(this.timer, 1000)
+        });
     }
 
     timer() {
@@ -73,30 +87,54 @@ class Game extends Component {
             leftArrow: 37,
             rightArrow: 39,
             space: 32,
-            slash: 191
+            slash: 191,
+            esc: 27
         };
 
-        if (event.keyCode === keys.a) {
-            this.movePieceLeft();
+        if (event.keyCode === keys.esc) {
+            this.pauseGame();
         }
-        else if (event.keyCode === keys.d) {
-            this.movePieceRight();
+
+        // Only accept game input if game is not paused
+        if(!this.state.gameIsPaused) {
+            if (event.keyCode === keys.a) {
+                this.movePieceLeft();
+            }
+            else if (event.keyCode === keys.d) {
+                this.movePieceRight();
+            }
+            else if (event.keyCode === keys.s) {
+                this.movePieceDown();
+            }
+            else if (event.keyCode === keys.space) {
+                this.hardDropPiece();
+            }
+            else if (event.keyCode === keys.w || event.keyCode === keys.space) {
+                this.hardDropPiece();
+            }
+            else if (event.keyCode === keys.rightArrow) {
+                this.rotatePiece(true);
+            }
+            else if (event.keyCode === keys.leftArrow) {
+                this.rotatePiece(false);
+            }
         }
-        else if (event.keyCode === keys.s) {
-            this.movePieceDown();
+    }
+
+    pauseGame() {
+        if (this.state.gameIsPaused) {
+            this.startGame();
         }
-        else if (event.keyCode === keys.space) {
-            this.hardDropPiece();
+        else {
+            clearInterval(this.state.gameLoop);
+            clearInterval(this.state.timer);
         }
-        else if (event.keyCode === keys.w || event.keyCode === keys.space) {
-            this.hardDropPiece();
-        }
-        else if (event.keyCode === keys.rightArrow) {
-            this.rotatePiece(true);
-        }
-        else if (event.keyCode === keys.leftArrow) {
-            this.rotatePiece(false);
-        }
+
+        this.setState(prevState => {
+            return {
+                gameIsPaused: !prevState.gameIsPaused
+            }
+        });
     }
 
     movePieceLeft() {
@@ -411,6 +449,7 @@ class Game extends Component {
             <div>
                 <h1>Tetris</h1>
                 <div className="game">
+                    <PauseScreen showPauseScreen={ this.state.gameIsPaused } />
                     <GameBoard 
                         gameBoard={ this.state.gameBoard }
                     />

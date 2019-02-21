@@ -42,3 +42,20 @@ h1 {
     height: 20px;
     width: 20px;
 }
+
+.pause-screen {
+    background-color: rgba(0, 0, 0, .6);
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.pause-screen h1 {
+    color: white;
+    font-size: 3em;
+    margin-top: 15%;
+    position: relative;
+    text-shadow: 5px 5px black;
+}
