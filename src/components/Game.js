@@ -63,7 +63,7 @@ class Game extends Component {
     }
 
     startGame() {
-        const gameSpeed = (1000 * 2) / this.state.level;
+        const gameSpeed = (1000) / this.state.level;
         this.setState({
             gameLoop: setInterval(this.gameLoop, gameSpeed),
             timer: setInterval(this.timer, 1000)
@@ -199,7 +199,7 @@ class Game extends Component {
 
     gameLoop() {
         if (this.state.pieceInSamePos > 2) {
-            this.setCurrentPiece();
+            this.lockCurrentPiece();
             this.clearAnyLinesAndUpdateScore();
             this.setLevel();
         }
@@ -208,7 +208,7 @@ class Game extends Component {
         this.movePiece(1, 0);
     }
 
-    setCurrentPiece() {
+    lockCurrentPiece() {
         this.setState(prevState => {
             const newCurrentPiece = prevState.nextPiece;
             newCurrentPiece.x = config.startingXPosition;
@@ -243,6 +243,7 @@ class Game extends Component {
             }
             else {
                 pieceInSamePos++;
+                this.checkIfPieceIsOnFloor();
             }
 
             return { 
@@ -252,6 +253,10 @@ class Game extends Component {
         });
 
         this.draw();
+    }
+
+    checkIfPieceIsOnFloor() {
+
     }
 
     clearAnyLinesAndUpdateScore() {
@@ -305,6 +310,7 @@ class Game extends Component {
     }
 
     setLevel() {
+        console.log("Setting Level...");
         this.setState(prevState => {
             const lines = prevState.lines;
 
@@ -314,9 +320,20 @@ class Game extends Component {
                 level = 1;
             }
 
-            return {
-                level: level
-            };
+            if (level > prevState.level) {
+                clearInterval(this.state.gameLoop);
+                const gameSpeed = (1000) / this.state.level;
+
+                return {
+                    level: level,
+                    gameLoop: setInterval(this.gameLoop, gameSpeed)
+                }
+            }
+            else {
+                return {
+                    level: level,
+                };
+            }
         });
     }
 
