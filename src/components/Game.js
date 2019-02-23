@@ -24,7 +24,8 @@ class Game extends Component {
             lockPieceTimer: 0,
             gameIsPaused: false,
             gameLoop: {},
-            timer: {}
+            timer: {},
+            gameOver: false
         }
 
         this.startGame = this.startGame.bind(this);
@@ -154,16 +155,21 @@ class Game extends Component {
     }
 
     hardDropPiece() {
-        while(!this.checkIfPieceIsOnFloor(this.state.gameBoard, this.state.currentPiece)) {
-            this.setState(prevState => {
-                const updatedPiece = prevState.currentPiece;
-                updatedPiece.y = prevState.currentPiece.y + 1;
+        let piece = this.state.currentPiece;
 
-                return {
-                    currentPiece: updatedPiece
-                };
-            });
+        while(!this.checkIfPieceIsOnFloor(this.state.gameBoard, piece)) {
+            piece.y++;
         }
+
+        this.setState({
+            currentPiece: piece
+        });
+
+        this.draw();
+        
+        this.lockCurrentPiece();
+        this.clearAnyLinesAndUpdateScore();
+        this.setLevel()
     }
 
     rotatePiece(turnRight) {;
@@ -257,6 +263,7 @@ class Game extends Component {
 
                 return { 
                     currentPiece: prevState.currentPiece,
+                    lockPieceTimer: 0
                 };
             });
         }
