@@ -153,29 +153,31 @@ class Game extends Component {
     }
 
     hardDropPiece() {
-        console.log("Drop Piece!");
     }
 
-    rotatePiece(turnRight) {
-        // Move Y up once to see if piece can be rotated;
-        // if it cannot be rotated after that, then do not rotate
+    rotatePiece(turnRight) {;
+        const oldOrientation = this.state.currentPiece.orientation;
+        let newOrientation = 0;
 
-        let orientation = this.state.currentPiece.orientation;
-
-        turnRight ? orientation++ : orientation--;
+        if (turnRight) {
+            newOrientation = oldOrientation + 1;
+        }
+        else {
+            newOrientation = oldOrientation - 1;
+        }
 
         // If it's fully turned right, turn it to position 0
-        if (orientation > 3) {
-            orientation = 0;
+        if (newOrientation > 3) {
+            newOrientation = 0;
         }
 
         // If it's fully turned left, turn it to position 3
-        if (orientation < 0) {
-            orientation = 3;
+        if (newOrientation < 0) {
+            newOrientation = 3;
         }
 
         let rotatedPiece = this.state.currentPiece;
-        rotatedPiece.orientation = orientation;
+        rotatedPiece.orientation = newOrientation;
 
         let collision = this.checkForCollision(
             this.state.currentPiece.y, 
@@ -184,17 +186,22 @@ class Game extends Component {
         );
 
         if (!collision) {
-            console.log(collision);
-            console.log("Changing!");
-            console.log(this.state.currentPiece);
             this.setState(prevState => {
                 return {
                     currentPiece: rotatedPiece
                 };
             });
-
-            this.draw();
         }
+        else {
+            rotatedPiece.orientation = oldOrientation;
+            this.setState(prevState => {
+                return {
+                    currentPiece: rotatedPiece
+                };
+            });
+        }
+
+        this.draw();
     }
 
     gameLoop() {
@@ -228,35 +235,30 @@ class Game extends Component {
     }
 
     movePiece(y, x) {
-        this.setState(prevState => {
-            let pieceInSamePos = prevState.pieceInSamePos;
+        const pieceInSamePos = this.state.pieceInSamePos;
+        const newYPos = this.state.currentPiece.y + y;
+        const newXPos = this.state.currentPiece.x + x;
+        const collision = this.checkForCollision(newYPos, newXPos, this.state.currentPiece);
 
-            let newYPos = prevState.currentPiece.y + y;
-            let newXPos = prevState.currentPiece.x + x;
-
-            let collision = this.checkForCollision(newYPos, newXPos, prevState.currentPiece);
-
-            if (!collision) {
+        if (!collision) {
+            this.setState(prevState => {
                 prevState.currentPiece.y += y;
                 prevState.currentPiece.x += x;
-                pieceInSamePos = 0;
-            }
-            else {
-                pieceInSamePos++;
-                this.checkIfPieceIsOnFloor();
-            }
 
-            return { 
-                currentPiece: prevState.currentPiece,
-                pieceInSamePos: pieceInSamePos
-            };
-        });
+                return { 
+                    currentPiece: prevState.currentPiece,
+                };
+            });
+        }
 
         this.draw();
     }
 
-    checkIfPieceIsOnFloor() {
+    checkIfPieceIsOnFloor(gameBoard, currentPiece) {
+        const orientation = currentPiece.orientation;
+        const amountOfXPoints = currentPiece.piece[orientation][0].length;
 
+        console.log(amountOfXPoints);
     }
 
     clearAnyLinesAndUpdateScore() {
@@ -310,7 +312,6 @@ class Game extends Component {
     }
 
     setLevel() {
-        console.log("Setting Level...");
         this.setState(prevState => {
             const lines = prevState.lines;
 
@@ -395,13 +396,12 @@ class Game extends Component {
                     // Catch out of bounds
                     if (newYPos < 0 || newYPos > 19 ||
                         newXPos < 0 || newXPos > 9) {
-                            console.log("Out of Bounds");
+                            console.log("Out of Bounds x:" + newXPos + " - y:" + newYPos);
                             return true;
                     }
 
                     // Catch if the piece is alrady occupied
                     if (currentGameBoard[newYPos][newXPos] > 0) {
-                        console.log("space occupied");
                         return true;
                     }
                 }
