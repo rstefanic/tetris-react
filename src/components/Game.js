@@ -392,11 +392,7 @@ class Game extends Component {
         this.setState(prevState => {
             const lines = prevState.lines;
 
-            let level = Math.floor(lines / 10);
-
-            if (level < 1) {
-                level = 1;
-            }
+            let level = Math.floor(lines / 10) + 1;
 
             if (level > prevState.level) {
                 clearInterval(this.state.gameLoop);
