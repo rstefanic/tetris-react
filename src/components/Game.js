@@ -472,13 +472,13 @@ class Game extends Component {
                     }
                     
                     // Catch out of bounds
-                    if (newYPos < 0 || newYPos > 19 ||
+                    if (newYPos > 19 ||
                         newXPos < 0 || newXPos > 9) {
                         return true;
                     }
 
                     // Catch if the piece is alrady occupied
-                    if (currentGameBoard[newYPos][newXPos] > 0) {
+                    if (newYPos >=0 && currentGameBoard[newYPos][newXPos] > 0) {
                         return true;
                     }
                 }
