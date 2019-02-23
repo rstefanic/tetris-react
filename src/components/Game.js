@@ -21,7 +21,7 @@ class Game extends Component {
             lines: 0,
             score: 0,
             timeElapsed: 0,
-            pieceInSamePos: 0,
+            lockPieceTimer: 0,
             gameIsPaused: false,
             gameLoop: {},
             timer: {}
@@ -205,7 +205,7 @@ class Game extends Component {
     }
 
     gameLoop() {
-        if (this.state.pieceInSamePos > 2) {
+        if (this.state.lockPieceTimer > 1) {
             this.lockCurrentPiece();
             this.clearAnyLinesAndUpdateScore();
             this.setLevel();
@@ -226,7 +226,7 @@ class Game extends Component {
             newNextPiece.orientation = 0;
 
             return {
-                pieceInSamePos: 0,
+                lockPieceTimer: 0,
                 previousPointsDrawn: [],
                 currentPiece: newCurrentPiece,
                 nextPiece: newNextPiece
@@ -235,11 +235,10 @@ class Game extends Component {
     }
 
     movePiece(y, x) {
-        const pieceInSamePos = this.state.pieceInSamePos;
         const newYPos = this.state.currentPiece.y + y;
         const newXPos = this.state.currentPiece.x + x;
         const collision = this.checkForCollision(newYPos, newXPos, this.state.currentPiece);
-
+        
         if (!collision) {
             this.setState(prevState => {
                 prevState.currentPiece.y += y;
@@ -250,18 +249,85 @@ class Game extends Component {
                 };
             });
         }
+        else {
+            if (this.checkIfPieceIsOnFloor(this.state.gameBoard, this.state.currentPiece)) {
+                this.setState(prevState => {
+                    return {
+                        lockPieceTimer: prevState.lockPieceTimer + 1
+                    };
+                });
+            }
+        }
 
         this.draw();
     }
 
     checkIfPieceIsOnFloor(gameBoard, currentPiece) {
+        let pieceIsOnFloor = false;
+        let pointsToCheck = [];
         const orientation = currentPiece.orientation;
-        const amountOfXPoints = currentPiece.piece[orientation][0].length;
+        const axisRelativeToPieceYPos = currentPiece.axisPositionY();
+        const axisRelativeToPieceXPos = currentPiece.axisPositionX(); 
+        const yPiecePos = currentPiece.y;
+        const xPiecePos = currentPiece.x;
+        const pieceHeight = currentPiece.piece[orientation].length;
+        const pieceWidth = currentPiece.piece[orientation][0].length;
 
-        console.log(amountOfXPoints);
+        // Work our way up from the bottom to check the x-pos of 
+        // each grid piece that needs to be checked
+        for(let x = 0; x < pieceWidth; x++) {
+
+            // For the inner loop, start from the bottom of the piece and work up
+            for(let y = pieceHeight - 1; y >= 0; y--) {
+                if (currentPiece.piece[orientation][y][x] !== 0) {
+                    const pointsContainingX = pointsToCheck.filter(points => {
+                        return points.x === x;
+                    });
+
+                    // Only add the point if there isn't an X coordinated point in the array
+                    if (pointsContainingX.length === 0) {
+                        pointsToCheck.push({y: y, x: x});
+                    }
+                }
+            }
+        }
+
+        pointsToCheck.forEach(point => {
+            const pointUnderYCoordinate = point.y + 1;
+
+            let yCheckPoint = 0;
+            let xCheckPoint = 0;
+
+            // Calculate the absolute difference between X and Y
+            let yDifference = this.absoluteDifference(axisRelativeToPieceYPos, pointUnderYCoordinate);
+            let xDifference = this.absoluteDifference(axisRelativeToPieceXPos, point.x);
+
+            if (pointUnderYCoordinate <= axisRelativeToPieceYPos) {
+                yCheckPoint = yPiecePos - yDifference;
+            }
+            else {
+                yCheckPoint = yPiecePos + yDifference;
+            }
+
+            if (point.x <= axisRelativeToPieceXPos) {
+                xCheckPoint = xPiecePos - xDifference;
+            }
+            else {
+                xCheckPoint = xPiecePos + xDifference;
+            }
+
+            if (yCheckPoint > 19 || 
+                gameBoard[yCheckPoint][xCheckPoint] > 0) {
+                    pieceIsOnFloor = true;
+            }
+        });
+
+        return pieceIsOnFloor;
     }
 
     clearAnyLinesAndUpdateScore() {
+        // TODO: Double check to ensure that the line clearing is accurate
+
         let currentGameBoard = this.state.gameBoard;
 
         let linesToClear = [];
@@ -350,6 +416,16 @@ class Game extends Component {
         });
     }
 
+    absoluteDifference(a, b) {
+        let difference = a - b;
+
+        if (difference < 0) {
+            difference *= -1;
+        }
+
+        return difference;
+    }
+
     checkForCollision(yTestPosition, xTestPosition, testPiece) {
         // While this is similar to updateGameBoard, this function is 
         // fundementally different because it's checking if a collision 
@@ -374,6 +450,8 @@ class Game extends Component {
                     let newXPos = 0;
  
                     // Calculate the absolute difference between X and Y
+                    // let yDifference = this.absoluteDifference(axisRelativeToPieceYPos, y);
+                    // let xDifference = this.absoluteDifference(axisRelativeToPieceYPos, x);
 
                     if (y <= axisRelativeToPieceYPos) {
                         let yDifference = axisRelativeToPieceYPos - y;
@@ -396,8 +474,7 @@ class Game extends Component {
                     // Catch out of bounds
                     if (newYPos < 0 || newYPos > 19 ||
                         newXPos < 0 || newXPos > 9) {
-                            console.log("Out of Bounds x:" + newXPos + " - y:" + newYPos);
-                            return true;
+                        return true;
                     }
 
                     // Catch if the piece is alrady occupied
