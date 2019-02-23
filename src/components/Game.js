@@ -80,7 +80,9 @@ class Game extends Component {
 
     handleKeyPress(event) {
         const keys = {
+            q: 81,
             w: 87,
+            e: 69,
             a: 65,
             s: 83,
             d: 68,
@@ -90,6 +92,8 @@ class Game extends Component {
             slash: 191,
             esc: 27
         };
+
+        console.log(event.keyCode);
 
         if (event.keyCode === keys.esc) {
             this.pauseGame();
@@ -109,10 +113,10 @@ class Game extends Component {
             else if (event.keyCode === keys.w || event.keyCode === keys.space) {
                 this.hardDropPiece();
             }
-            else if (event.keyCode === keys.rightArrow) {
+            else if (event.keyCode === keys.rightArrow || event.keyCode === keys.e) {
                 this.rotatePiece(true);
             }
-            else if (event.keyCode === keys.leftArrow) {
+            else if (event.keyCode === keys.leftArrow || event.keyCode === keys.q) {
                 this.rotatePiece(false);
             }
         }
