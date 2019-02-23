@@ -106,9 +106,6 @@ class Game extends Component {
             else if (event.keyCode === keys.s) {
                 this.movePieceDown();
             }
-            else if (event.keyCode === keys.space) {
-                this.hardDropPiece();
-            }
             else if (event.keyCode === keys.w || event.keyCode === keys.space) {
                 this.hardDropPiece();
             }
@@ -153,6 +150,16 @@ class Game extends Component {
     }
 
     hardDropPiece() {
+        while(!this.checkIfPieceIsOnFloor(this.state.gameBoard, this.state.currentPiece)) {
+            this.setState(prevState => {
+                const updatedPiece = prevState.currentPiece;
+                updatedPiece.y = prevState.currentPiece.y + 1;
+
+                return {
+                    currentPiece: updatedPiece
+                };
+            });
+        }
     }
 
     rotatePiece(turnRight) {;
@@ -292,6 +299,8 @@ class Game extends Component {
             }
         }
 
+        // Now go through each of the recorded points and check to see if the piece under it
+        // is either the floor or another piece
         pointsToCheck.forEach(point => {
             const pointUnderYCoordinate = point.y + 1;
 
@@ -326,28 +335,26 @@ class Game extends Component {
     }
 
     clearAnyLinesAndUpdateScore() {
-        // TODO: Double check to ensure that the line clearing is accurate
-
         let currentGameBoard = this.state.gameBoard;
 
-        let linesToClear = [];
+        let lineNumbersToClear = [];
 
         for (let i = 0; i < currentGameBoard.length; i++) {
             let row = currentGameBoard[i].filter(value => value !== 0);
             if (row.length === 10) {
-                linesToClear.push(i);
+                console.log("clearing line #", i);
+                lineNumbersToClear.push(i);
             }
         }
 
-        for(let i = 0; i < linesToClear.length; i++) {
-            currentGameBoard.splice(linesToClear[i], 1);
-        }
-
-        linesToClear.forEach(x => {
+        // For each line that needs to be removed, remove it 
+        // and add a new one the top of the game board
+        lineNumbersToClear.forEach(x => {
+            currentGameBoard.splice(x, 1);
             currentGameBoard.unshift(Array(10).fill(0));
-        })
+        });
 
-        const linesCleared = linesToClear.length;
+        const linesCleared = lineNumbersToClear.length;
 
         this.setState(prevState => {
 
