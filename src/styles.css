@@ -2,7 +2,7 @@ body {
     background-color: gainsboro;
 }
 
-h1 {
+h1, h2, p {
     text-align: center;
 }
 
@@ -52,10 +52,23 @@ h1 {
     top: 0;
 }
 
-.pause-screen h1 {
+.pause-screen h1,
+.pause-screen h2,
+.pause-screen p {
     color: white;
     font-size: 3em;
-    margin-top: 15%;
     position: relative;
     text-shadow: 5px 5px black;
+}
+
+.pause-screen h1 {
+    margin-top: 15%;
+}
+
+.pause-screen h2 {
+    margin-top: 10%;
+}
+
+.pause-screen p {
+    margin-top: 1%;
 }
