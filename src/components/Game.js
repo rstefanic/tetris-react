@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
-import blankGameBoard from "./blankGameBoard";
+import Footer from './Footer';
+import blankGameBoard from './blankGameBoard';
 import GameBoard from './GameBoard';
 import GameInfo from './GameInfo';
 import GameOver from './GameOver';
@@ -593,6 +594,7 @@ class Game extends Component {
                         score={ this.state.score }
                         timeElapsed={ this.state.timeElapsed }
                     />
+                    <Footer />
                 </div>
             </div>
         );

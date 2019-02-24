@@ -72,3 +72,13 @@ h1, h2, p {
 .pause-screen p {
     margin-top: 1%;
 }
+
+.tetris-footer {
+    clear: both;
+    padding-top: 2%;
+    text-align: center;
+}
+
+.tetris-footer p {
+    margin: 0;
+}
