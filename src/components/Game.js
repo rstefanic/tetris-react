@@ -3,6 +3,7 @@ import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
 import blankGameBoard from "./blankGameBoard";
 import GameBoard from './GameBoard';
 import GameInfo from './GameInfo';
+import GameOver from './GameOver';
 import PauseScreen from './PauseScreen';
 
 import '../styles.css';
@@ -93,8 +94,6 @@ class Game extends Component {
             slash: 191,
             esc: 27
         };
-
-        console.log(event.keyCode);
 
         if (event.keyCode === keys.esc) {
             this.pauseGame();
@@ -230,25 +229,50 @@ class Game extends Component {
 
         // Apply Gravity
         this.movePiece(1, 0);
+
+        if (this.state.gameOver) {
+            this.gameOver();
+        }
+    }
+
+    gameOver() {
+        clearInterval(this.state.gameLoop);
+        clearInterval(this.state.timer);
+
+        this.setState({
+            gameOver: true
+        });
     }
 
     lockCurrentPiece() {
-        this.setState(prevState => {
-            const newCurrentPiece = prevState.nextPiece;
-            newCurrentPiece.x = config.startingXPosition;
-            newCurrentPiece.y = config.startingYPosition;
-            newCurrentPiece.orientation = 0;
+        const pointsDrawnAtTopOfScreen = 
+            this.state.previousPointsDrawn
+                .filter(point => point.y < 1);
 
-            const newNextPiece = allTetrominos[Math.floor(Math.random() * 7)];
-            newNextPiece.orientation = 0;
+        // If any points are drawn at the top of the screen, then the game is over
+        if (pointsDrawnAtTopOfScreen.length > 0) {
+            this.setState({
+                gameOver: true
+            });
+        }
+        else {
+            this.setState(prevState => {
+                const newCurrentPiece = prevState.nextPiece;
+                newCurrentPiece.x = config.startingXPosition;
+                newCurrentPiece.y = config.startingYPosition;
+                newCurrentPiece.orientation = 0;
 
-            return {
-                lockPieceTimer: 0,
-                previousPointsDrawn: [],
-                currentPiece: newCurrentPiece,
-                nextPiece: newNextPiece
-            };
-       });
+                const newNextPiece = allTetrominos[Math.floor(Math.random() * 7)];
+                newNextPiece.orientation = 0;
+
+                return {
+                    lockPieceTimer: 0,
+                    previousPointsDrawn: [],
+                    currentPiece: newCurrentPiece,
+                    nextPiece: newNextPiece
+                };
+            });
+        }
     }
 
     movePiece(y, x) {
@@ -353,7 +377,6 @@ class Game extends Component {
         for (let i = 0; i < currentGameBoard.length; i++) {
             let row = currentGameBoard[i].filter(value => value !== 0);
             if (row.length === 10) {
-                console.log("clearing line #", i);
                 lineNumbersToClear.push(i);
             }
         }
@@ -558,6 +581,7 @@ class Game extends Component {
                 <h1>Tetris</h1>
                 <div className="game">
                     <PauseScreen showPauseScreen={ this.state.gameIsPaused } />
+                    { this.state.gameOver && <GameOver score={ this.state.score } lines={ this.state.lines } /> }
                     <GameBoard 
                         gameBoard={ this.state.gameBoard }
                     />
