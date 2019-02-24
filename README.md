@@ -1,13 +1,10 @@
 # Tetris React
 
-React built in tetris.
+Tetris built in react.
 
-```
-npm install
-npm start
-```
+![Game Play](./pictures/game_play.png "Game Play")
 
-Then to add it to your app, just include the component in your React App. No props needed.
+You can then just include the component in your React App. No props needed.
 
 ```js
 <Game />
