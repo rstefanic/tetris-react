@@ -100,7 +100,6 @@ class Game extends Component {
             this.pauseGame();
         }
 
-        // Only accept game input if game is not paused
         if(!this.state.gameIsPaused) {
             if (event.keyCode === keys.a) {
                 this.movePieceLeft();
@@ -343,7 +342,6 @@ class Game extends Component {
             let yCheckPoint = 0;
             let xCheckPoint = 0;
 
-            // Calculate the absolute difference between X and Y
             let yDifference = this.absoluteDifference(axisRelativeToPieceYPos, pointUnderYCoordinate);
             let xDifference = this.absoluteDifference(axisRelativeToPieceXPos, point.x);
 
@@ -487,7 +485,6 @@ class Game extends Component {
                     let newYPos = 0;
                     let newXPos = 0;
  
-                    // Calculate the absolute difference between X and Y
                     // let yDifference = this.absoluteDifference(axisRelativeToPieceYPos, y);
                     // let xDifference = this.absoluteDifference(axisRelativeToPieceYPos, x);
 
@@ -527,7 +524,7 @@ class Game extends Component {
     }
 
     updateGameBoard(gameBoard, currentPiece, oldDrawingPoints, newDrawingPoints) {
-        // Draw piece around axis
+        // Draw piece around the tetromino axis
         const axisRelativeToPieceYPos = currentPiece.axisPositionY();
         const axisRelativeToPieceXPos = currentPiece.axisPositionX(); 
         const orientation = currentPiece.orientation;
