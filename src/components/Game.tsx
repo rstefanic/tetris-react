@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 /* Types & Pieces */
 import { startingXPosition, startingYPosition} from '../config';
-import { GameBoard, Tetromino, Points } from '../types';
+import { GameBoard, Tetromino, TetrominoInfo, Points } from '../types';
 import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
 
 /* Components */
@@ -70,7 +70,7 @@ class Game extends Component<any, GameState> {
         this.setLevel = this.setLevel.bind(this);
     }
 
-    componentDidMount() {
+    componentDidMount(): void {
         document.addEventListener('keydown', this.handleKeyPress);
 
         const firstPiece = allTetrominos[Math.floor(Math.random() * 7)];
@@ -88,7 +88,7 @@ class Game extends Component<any, GameState> {
         this.startGame();
     }
 
-    startGame() {
+    startGame(): void {
         const gameSpeed = (1000) / this.state.level;
         this.setState({
             gameLoop: setInterval(this.gameLoop, gameSpeed),
@@ -96,7 +96,7 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    timer() {
+    timer(): void {
         this.setState(prevState => {
             return {
                 timeElapsed: prevState.timeElapsed + 1
@@ -104,7 +104,7 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    handleKeyPress(event: { keyCode: number; }) {
+    handleKeyPress(event: { keyCode: number; }): void {
         const keys = {
             q: 81,
             w: 87,
@@ -145,7 +145,7 @@ class Game extends Component<any, GameState> {
         }
     }
 
-    pauseGame() {
+    pauseGame(): void {
         if (this.state.gameIsPaused) {
             this.startGame();
         }
@@ -161,23 +161,23 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    movePieceLeft() {
+    movePieceLeft(): void {
         this.movePiece(0, -1);
         this.draw();
     }
 
-    movePieceRight() {
+    movePieceRight(): void {
         this.movePiece(0, 1);
         this.draw();
     }
 
-    movePieceDown() {
+    movePieceDown(): void {
         this.movePiece(1, 0);
         this.draw();
     }
 
-    hardDropPiece() {
-        let piece = this.state.currentPiece;
+    hardDropPiece(): void {
+        let piece: Tetromino = this.state.currentPiece;
 
         while(!this.checkIfPieceIsOnFloor(this.state.gameBoard, piece)) {
             piece.y++;
@@ -194,9 +194,9 @@ class Game extends Component<any, GameState> {
         this.setLevel()
     }
 
-    rotatePiece(turnRight: boolean) {;
+    rotatePiece(turnRight: boolean): void {;
         const oldOrientation = this.state.currentPiece.orientation;
-        let newOrientation = 0;
+        let newOrientation: number = 0;
 
         if (turnRight) {
             newOrientation = oldOrientation + 1;
@@ -215,10 +215,10 @@ class Game extends Component<any, GameState> {
             newOrientation = 3;
         }
 
-        let rotatedPiece = this.state.currentPiece;
+        let rotatedPiece: Tetromino = this.state.currentPiece;
         rotatedPiece.orientation = newOrientation;
 
-        let collision = this.checkForCollision(
+        let collision: boolean = this.checkForCollision(
             this.state.currentPiece.y, 
             this.state.currentPiece.x, 
             rotatedPiece
@@ -243,7 +243,7 @@ class Game extends Component<any, GameState> {
         this.draw();
     }
 
-    gameLoop() {
+    gameLoop(): void {
         if (this.state.lockPieceTimer > 1) {
             this.lockCurrentPiece();
             this.clearAnyLinesAndUpdateScore();
@@ -258,7 +258,7 @@ class Game extends Component<any, GameState> {
         }
     }
 
-    gameOver() {
+    gameOver() : void {
         clearInterval(this.state.gameLoop);
         clearInterval(this.state.timer);
 
@@ -267,7 +267,7 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    lockCurrentPiece() {
+    lockCurrentPiece() : void {
         const pointsDrawnAtTopOfScreen = 
             this.state.previousPointsDrawn
                 .filter((point: { y: number; }) => point.y < 1);
@@ -298,7 +298,7 @@ class Game extends Component<any, GameState> {
         }
     }
 
-    movePiece(y: number, x: number) {
+    movePiece(y: number, x: number): void {
         const newYPos = this.state.currentPiece.y + y;
         const newXPos = this.state.currentPiece.x + x;
         const collision = this.checkForCollision(newYPos, newXPos, this.state.currentPiece);
@@ -327,14 +327,13 @@ class Game extends Component<any, GameState> {
         this.draw();
     }
 
-    checkIfPieceIsOnFloor(gameBoard: GameBoard, currentPiece: Tetromino) {
-        let pieceIsOnFloor = false;
-        let pointsToCheck = [];
-        const orientation = currentPiece.orientation;
-        const axisRelativeToPieceYPos = currentPiece.axisPositionY();
-        const axisRelativeToPieceXPos = currentPiece.axisPositionX(); 
+    checkIfPieceIsOnFloor(gameBoard: GameBoard, currentPiece: Tetromino): boolean {
+        let pieceIsOnFloor: boolean = false;
+        let pointsToCheck: Points[] = [];
+        const { axisRelativeToPieceXPos, axisRelativeToPieceYPos, orientation } = this.getTetrominoInfo(currentPiece);
         const yPiecePos = currentPiece.y;
         const xPiecePos = currentPiece.x;
+
         const pieceHeight = currentPiece.piece[orientation].length;
         const pieceWidth = currentPiece.piece[orientation][0].length;
 
@@ -360,13 +359,12 @@ class Game extends Component<any, GameState> {
         // Now go through each of the recorded points and check to see if the piece under it
         // is either the floor or another piece
         pointsToCheck.forEach(point => {
-            const pointUnderYCoordinate = point.y + 1;
+            const pointUnderYCoordinate: number = point.y + 1;
 
-            let yCheckPoint = 0;
-            let xCheckPoint = 0;
-
-            let yDifference = this.absoluteDifference(axisRelativeToPieceYPos, pointUnderYCoordinate);
-            let xDifference = this.absoluteDifference(axisRelativeToPieceXPos, point.x);
+            let yCheckPoint: number = 0;
+            let xCheckPoint: number = 0;
+            let yDifference: number = this.absoluteDifference(axisRelativeToPieceYPos, pointUnderYCoordinate);
+            let xDifference: number = this.absoluteDifference(axisRelativeToPieceXPos, point.x);
 
             if (pointUnderYCoordinate <= axisRelativeToPieceYPos) {
                 yCheckPoint = yPiecePos - yDifference;
@@ -391,13 +389,13 @@ class Game extends Component<any, GameState> {
         return pieceIsOnFloor;
     }
 
-    clearAnyLinesAndUpdateScore() {
-        let currentGameBoard = this.state.gameBoard;
+    clearAnyLinesAndUpdateScore(): void {
+        let currentGameBoard: GameBoard = this.state.gameBoard;
 
-        let lineNumbersToClear = [];
+        let lineNumbersToClear: number[] = [];
 
         for (let i = 0; i < currentGameBoard.length; i++) {
-            let row = currentGameBoard[i].filter(value => value !== 0);
+            let row: number[] = currentGameBoard[i].filter(value => value !== 0);
             if (row.length === 10) {
                 lineNumbersToClear.push(i);
             }
@@ -410,11 +408,11 @@ class Game extends Component<any, GameState> {
             currentGameBoard.unshift(Array<number>(10).fill(0));
         });
 
-        const linesCleared = lineNumbersToClear.length;
+        const linesCleared: number = lineNumbersToClear.length;
 
         this.setState(prevState => {
 
-            let pointsEarned = 0; 
+            let pointsEarned: number = 0; 
             switch (linesCleared) {
                 case 1:
                     pointsEarned = 40 * prevState.level;
@@ -440,11 +438,11 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    setLevel() {
+    setLevel(): void {
         this.setState((prevState: GameState) => {
             const lines = prevState.lines;
 
-            let level = Math.floor(lines / 10) + 1;
+            let level: number = Math.floor(lines / 10) + 1;
 
             if (level > prevState.level) {
                 clearInterval(this.state.gameLoop);
@@ -464,7 +462,7 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    draw() {
+    draw(): void {
         this.setState((prevState: GameState) => {
             let newPoints: Points[] = [];
             this.updateGameBoard(prevState.gameBoard, prevState.currentPiece, prevState.previousPointsDrawn, newPoints);
@@ -476,8 +474,8 @@ class Game extends Component<any, GameState> {
         });
     }
 
-    absoluteDifference(a: number, b: number) {
-        let difference = a - b;
+    absoluteDifference(a: number, b: number): number {
+        let difference: number = a - b;
 
         if (difference < 0) {
             difference *= -1;
@@ -486,44 +484,46 @@ class Game extends Component<any, GameState> {
         return difference;
     }
 
-    checkForCollision(yTestPosition: number, xTestPosition: number, testPiece: Tetromino) {
-        // While this is similar to updateGameBoard, this function is 
-        // fundementally different because it's checking if a collision 
-        // will occur instead of updating the gameboard.
+    getTetrominoInfo(tetromino: Tetromino): TetrominoInfo {
+        const axisRelativeToPieceYPos: number = tetromino.axisPositionY();
+        const axisRelativeToPieceXPos: number = tetromino.axisPositionX(); 
+        const orientation: number = tetromino.orientation;
 
-        const axisRelativeToPieceYPos: number = testPiece.axisPositionY();
-        const axisRelativeToPieceXPos: number = testPiece.axisPositionX(); 
-        const orientation: number = testPiece.orientation;
+        return { axisRelativeToPieceXPos, axisRelativeToPieceYPos, orientation };
+    }
+
+    // This function is used to check if a collision will occur
+    checkForCollision(yTestPosition: number, xTestPosition: number, testPiece: Tetromino): boolean {
+
+        const { axisRelativeToPieceXPos, axisRelativeToPieceYPos, orientation } = this.getTetrominoInfo(testPiece);
 
         let currentGameBoard: GameBoard = this.state.gameBoard;
         this.state.previousPointsDrawn.forEach(points => {
             currentGameBoard[points.y][points.x] = 0;
         });
 
-        for(let y = 0; y < testPiece.piece[orientation].length; y++) {
-            for(let x = 0; x < testPiece.piece[orientation][y].length; x++) {
-                if (testPiece.piece[orientation][y][x] > 0) { //&&
-                    // this.state.previousPointsDrawn.x !== x &&
-                    // this.state.previousPointsDrawn.y !== y) {
+        for(let y: number = 0; y < testPiece.piece[orientation].length; y++) {
+            for(let x: number = 0; x < testPiece.piece[orientation][y].length; x++) {
+                if (testPiece.piece[orientation][y][x] > 0) {
 
-                    let newYPos = 0;
-                    let newXPos = 0;
+                    let newYPos: number = 0;
+                    let newXPos: number = 0;
  
                     if (y <= axisRelativeToPieceYPos) {
-                        let yDifference = axisRelativeToPieceYPos - y;
+                        let yDifference: number = axisRelativeToPieceYPos - y;
                         newYPos = yTestPosition - yDifference;
                     }
                     else {
-                        let yDifference = y - axisRelativeToPieceYPos;;
+                        let yDifference: number = y - axisRelativeToPieceYPos;;
                         newYPos = yTestPosition + yDifference;
                     }
 
                     if (x <= axisRelativeToPieceXPos) {
-                        let xDifference = axisRelativeToPieceXPos - x;
+                        let xDifference: number = axisRelativeToPieceXPos - x;
                         newXPos = xTestPosition - xDifference;
                     }
                     else {
-                        let xDifference = x - axisRelativeToPieceXPos;
+                        let xDifference: number = x - axisRelativeToPieceXPos;
                         newXPos = xTestPosition + xDifference;
                     }
                     
@@ -544,22 +544,20 @@ class Game extends Component<any, GameState> {
         return false;
     }
 
-    updateGameBoard(gameBoard: GameBoard, currentPiece: Tetromino, oldDrawingPoints: Points[], newDrawingPoints: Points[]) {
+    updateGameBoard(gameBoard: GameBoard, currentPiece: Tetromino, oldDrawingPoints: Points[], newDrawingPoints: Points[]): void {
         // Draw piece around the tetromino axis
-        const axisRelativeToPieceYPos = currentPiece.axisPositionY();
-        const axisRelativeToPieceXPos = currentPiece.axisPositionX(); 
-        const orientation = currentPiece.orientation;
 
+        const { axisRelativeToPieceXPos, axisRelativeToPieceYPos, orientation } = this.getTetrominoInfo(currentPiece);
         oldDrawingPoints.forEach((points: { y: number; x: number; }) => {
             gameBoard[points.y][points.x] = 0;
         });
 
-        for(let y = 0; y < currentPiece.piece[orientation].length; y++) {
-            for(let x = 0; x < currentPiece.piece[orientation][y].length; x++) {
+        for(let y: number = 0; y < currentPiece.piece[orientation].length; y++) {
+            for(let x: number = 0; x < currentPiece.piece[orientation][y].length; x++) {
                 if (currentPiece.piece[orientation][y][x] > 0) {
 
-                    let newYPos = 0;
-                    let newXPos = 0;
+                    let newYPos: number = 0;
+                    let newXPos: number = 0;
  
                     // In order to ensure the difference between the realtive 
                     // axis point and the current point in the loop is absolute,
@@ -568,20 +566,20 @@ class Game extends Component<any, GameState> {
                     // to determine the order of the elements
 
                     if (y <= axisRelativeToPieceYPos) {
-                        let yDifference = axisRelativeToPieceYPos - y;
+                        let yDifference: number = axisRelativeToPieceYPos - y;
                         newYPos = currentPiece.y - yDifference;
                     }
                     else {
-                        let yDifference = y - axisRelativeToPieceYPos;;
+                        let yDifference: number = y - axisRelativeToPieceYPos;;
                         newYPos = currentPiece.y + yDifference;
                     }
 
                     if (x <= axisRelativeToPieceXPos) {
-                        let xDifference = axisRelativeToPieceXPos - x;
+                        let xDifference: number = axisRelativeToPieceXPos - x;
                         newXPos = currentPiece.x - xDifference;
                     }
                     else {
-                        let xDifference = x - axisRelativeToPieceXPos;
+                        let xDifference: number = x - axisRelativeToPieceXPos;
                         newXPos = currentPiece.x + xDifference;
                     }
 
@@ -594,7 +592,7 @@ class Game extends Component<any, GameState> {
         }
     }
 
-    render() {
+    render(): JSX.Element {
         return (
             <div>
                 <h1>Tetris</h1>

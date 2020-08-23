@@ -3,6 +3,12 @@ export interface Points {
     y: number;
 }
 
+export interface TetrominoInfo {
+    axisRelativeToPieceYPos: number;
+    axisRelativeToPieceXPos: number;
+    orientation: number;
+}
+
 export interface Tetromino {
     orientation: number;
     axisPositionY: () => number;
