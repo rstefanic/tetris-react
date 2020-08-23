@@ -1,19 +1,42 @@
+/* React */
 import React, { Component } from 'react';
+
+/* Types & Pieces */
+import { startingXPosition, startingYPosition} from '../config';
+import { GameBoard, Tetromino } from '../types';
 import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
+
+/* Components */
 import Footer from './Footer';
 import blankGameBoard from './blankGameBoard';
-import GameBoard from './GameBoard';
+import GameBoardComponent from './GameBoard';
 import GameInfo from './GameInfo';
 import GameOver from './GameOver';
 import PauseScreen from './PauseScreen';
 
+/* Styles */
 import '../styles.css';
 
-const config = require('../config.ts');
+interface GameState {
+    gameBoard: GameBoard;
+    previousPointsDrawn: Points[];
+    currentPiece: Tetromino;
+    nextPiece: Tetromino;
+    level: number;
+    lines: number;
+    score: number;
+    timeElapsed: number;
+    lockPieceTimer: number;
+    gameIsPaused: boolean;
+    gameLoop: any;
+    timer: any;
+    gameOver: boolean;
 
-class Game extends Component {
+}
+
+class Game extends Component<any, GameState> {
     constructor() {
-        super();
+        super({});
         this.state = {
             gameBoard: [],
             previousPointsDrawn: [],
@@ -53,8 +76,8 @@ class Game extends Component {
         const firstPiece = allTetrominos[Math.floor(Math.random() * 7)];
         const secondPiece = allTetrominos[Math.floor(Math.random() * 7)];
 
-        firstPiece.x = config.startingXPosition;
-        firstPiece.y = config.startingYPosition;
+        firstPiece.x = startingXPosition;
+        firstPiece.y = startingYPosition;
 
         this.setState({
             gameBoard: blankGameBoard,
@@ -81,7 +104,7 @@ class Game extends Component {
         });
     }
 
-    handleKeyPress(event) {
+    handleKeyPress(event: { keyCode: number; }) {
         const keys = {
             q: 81,
             w: 87,
@@ -171,7 +194,7 @@ class Game extends Component {
         this.setLevel()
     }
 
-    rotatePiece(turnRight) {;
+    rotatePiece(turnRight: boolean) {;
         const oldOrientation = this.state.currentPiece.orientation;
         let newOrientation = 0;
 
@@ -202,7 +225,7 @@ class Game extends Component {
         );
 
         if (!collision) {
-            this.setState(prevState => {
+            this.setState(() => {
                 return {
                     currentPiece: rotatedPiece
                 };
@@ -210,7 +233,7 @@ class Game extends Component {
         }
         else {
             rotatedPiece.orientation = oldOrientation;
-            this.setState(prevState => {
+            this.setState(() => {
                 return {
                     currentPiece: rotatedPiece
                 };
@@ -247,7 +270,7 @@ class Game extends Component {
     lockCurrentPiece() {
         const pointsDrawnAtTopOfScreen = 
             this.state.previousPointsDrawn
-                .filter(point => point.y < 1);
+                .filter((point: { y: number; }) => point.y < 1);
 
         // If any points are drawn at the top of the screen, then the game is over
         if (pointsDrawnAtTopOfScreen.length > 0) {
@@ -258,8 +281,8 @@ class Game extends Component {
         else {
             this.setState(prevState => {
                 const newCurrentPiece = prevState.nextPiece;
-                newCurrentPiece.x = config.startingXPosition;
-                newCurrentPiece.y = config.startingYPosition;
+                newCurrentPiece.x = startingXPosition;
+                newCurrentPiece.y = startingYPosition;
                 newCurrentPiece.orientation = 0;
 
                 const newNextPiece = allTetrominos[Math.floor(Math.random() * 7)];
@@ -275,7 +298,7 @@ class Game extends Component {
         }
     }
 
-    movePiece(y, x) {
+    movePiece(y: number, x: number) {
         const newYPos = this.state.currentPiece.y + y;
         const newXPos = this.state.currentPiece.x + x;
         const collision = this.checkForCollision(newYPos, newXPos, this.state.currentPiece);
@@ -304,7 +327,7 @@ class Game extends Component {
         this.draw();
     }
 
-    checkIfPieceIsOnFloor(gameBoard, currentPiece) {
+    checkIfPieceIsOnFloor(gameBoard: GameBoard, currentPiece: Tetromino) {
         let pieceIsOnFloor = false;
         let pointsToCheck = [];
         const orientation = currentPiece.orientation;
@@ -384,7 +407,7 @@ class Game extends Component {
         // and add a new one the top of the game board
         lineNumbersToClear.forEach(x => {
             currentGameBoard.splice(x, 1);
-            currentGameBoard.unshift(Array(10).fill(0));
+            currentGameBoard.unshift(Array<number>(10).fill(0));
         });
 
         const linesCleared = lineNumbersToClear.length;
@@ -418,7 +441,7 @@ class Game extends Component {
     }
 
     setLevel() {
-        this.setState(prevState => {
+        this.setState((prevState: GameState) => {
             const lines = prevState.lines;
 
             let level = Math.floor(lines / 10) + 1;
@@ -435,14 +458,15 @@ class Game extends Component {
             else {
                 return {
                     level: level,
+                    gameLoop: this.gameLoop
                 };
             }
         });
     }
 
     draw() {
-        this.setState(prevState => {
-            let newPoints = [];
+        this.setState((prevState: GameState) => {
+            let newPoints: Points[] = [];
             this.updateGameBoard(prevState.gameBoard, prevState.currentPiece, prevState.previousPointsDrawn, newPoints);
 
             return { 
@@ -452,7 +476,7 @@ class Game extends Component {
         });
     }
 
-    absoluteDifference(a, b) {
+    absoluteDifference(a: number, b: number) {
         let difference = a - b;
 
         if (difference < 0) {
@@ -462,32 +486,29 @@ class Game extends Component {
         return difference;
     }
 
-    checkForCollision(yTestPosition, xTestPosition, testPiece) {
+    checkForCollision(yTestPosition: number, xTestPosition: number, testPiece: Tetromino) {
         // While this is similar to updateGameBoard, this function is 
         // fundementally different because it's checking if a collision 
         // will occur instead of updating the gameboard.
 
-        const axisRelativeToPieceYPos = testPiece.axisPositionY();
-        const axisRelativeToPieceXPos = testPiece.axisPositionX(); 
-        const orientation = testPiece.orientation;
+        const axisRelativeToPieceYPos: number = testPiece.axisPositionY();
+        const axisRelativeToPieceXPos: number = testPiece.axisPositionX(); 
+        const orientation: number = testPiece.orientation;
 
-        let currentGameBoard = this.state.gameBoard;
+        let currentGameBoard: GameBoard = this.state.gameBoard;
         this.state.previousPointsDrawn.forEach(points => {
             currentGameBoard[points.y][points.x] = 0;
         });
 
         for(let y = 0; y < testPiece.piece[orientation].length; y++) {
             for(let x = 0; x < testPiece.piece[orientation][y].length; x++) {
-                if (testPiece.piece[orientation][y][x] > 0 &&
-                    this.state.previousPointsDrawn.x !== x &&
-                    this.state.previousPointsDrawn.y !== y) {
+                if (testPiece.piece[orientation][y][x] > 0) { //&&
+                    // this.state.previousPointsDrawn.x !== x &&
+                    // this.state.previousPointsDrawn.y !== y) {
 
                     let newYPos = 0;
                     let newXPos = 0;
  
-                    // let yDifference = this.absoluteDifference(axisRelativeToPieceYPos, y);
-                    // let xDifference = this.absoluteDifference(axisRelativeToPieceYPos, x);
-
                     if (y <= axisRelativeToPieceYPos) {
                         let yDifference = axisRelativeToPieceYPos - y;
                         newYPos = yTestPosition - yDifference;
@@ -523,13 +544,13 @@ class Game extends Component {
         return false;
     }
 
-    updateGameBoard(gameBoard, currentPiece, oldDrawingPoints, newDrawingPoints) {
+    updateGameBoard(gameBoard: GameBoard, currentPiece: Tetromino, oldDrawingPoints: Points[], newDrawingPoints: Points[]) {
         // Draw piece around the tetromino axis
         const axisRelativeToPieceYPos = currentPiece.axisPositionY();
         const axisRelativeToPieceXPos = currentPiece.axisPositionX(); 
         const orientation = currentPiece.orientation;
 
-        oldDrawingPoints.forEach(points => {
+        oldDrawingPoints.forEach((points: { y: number; x: number; }) => {
             gameBoard[points.y][points.x] = 0;
         });
 
@@ -580,7 +601,7 @@ class Game extends Component {
                 <div className="game">
                     <PauseScreen showPauseScreen={ this.state.gameIsPaused } />
                     { this.state.gameOver && <GameOver score={ this.state.score } lines={ this.state.lines } /> }
-                    <GameBoard 
+                    <GameBoardComponent 
                         gameBoard={ this.state.gameBoard }
                     />
                     <GameInfo 
