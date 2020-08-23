@@ -165,7 +165,9 @@ export const iTetromino: Tetromino = {
         }
     },
     piece: iPiece,
-    color: 1
+    color: 1,
+    x: 0,
+    y: 0
 }
 
 export const oTetromino: Tetromino = {
@@ -173,7 +175,9 @@ export const oTetromino: Tetromino = {
     axisPositionY: function() { return 0; },
     axisPositionX: function() { return 1; },
     piece: oPiece,
-    color: 2
+    color: 2,
+    x: 0,
+    y: 0
 }
 
 export const tTetromino: Tetromino = {
@@ -195,7 +199,9 @@ export const tTetromino: Tetromino = {
         }
     },
     piece: tPiece,
-    color: 3
+    color: 3,
+    x: 0,
+    y: 0
 }
 
 export const sTetromino: Tetromino = {
@@ -210,7 +216,9 @@ export const sTetromino: Tetromino = {
     }, 
     axisPositionX: function() { return 1; },
     piece: sPiece,
-    color: 4
+    color: 4,
+    x: 0,
+    y: 0
 }
 
 export const zTetromino: Tetromino = {
@@ -225,7 +233,9 @@ export const zTetromino: Tetromino = {
     },
     axisPositionX: function() { return 1; },
     piece: zPiece,
-    color: 5 
+    color: 5 ,
+    x: 0,
+    y: 0
 }
 
 export const jTetromino: Tetromino = {
@@ -247,7 +257,9 @@ export const jTetromino: Tetromino = {
         }
     },
     piece: jPiece,
-    color: 6
+    color: 6,
+    x: 0,
+    y: 0
 }
 
 export const lTetromino: Tetromino = {
@@ -269,7 +281,9 @@ export const lTetromino: Tetromino = {
         }
     },
     piece: lPiece,
-    color: 7
+    color: 7,
+    x: 0,
+    y: 0
 }
 
 export const allTetrominos: Tetromino[] = [
