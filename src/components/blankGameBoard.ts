@@ -1,4 +1,6 @@
-const blankGameBoard = 
+import { GameBoard } from "../types";
+
+const blankGameBoard: GameBoard = 
 [
     [0, 0, 0, 0, 0, 0, 0, 0, 0 ,0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0 ,0],

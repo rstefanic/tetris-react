@@ -9,7 +9,7 @@ import PauseScreen from './PauseScreen';
 
 import '../styles.css';
 
-const config = require('../config');
+const config = require('../config.ts');
 
 class Game extends Component {
     constructor() {
@@ -589,7 +589,6 @@ class Game extends Component {
                         nextPiece={ this.state.nextPiece }
                         lines={ this.state.lines }
                         score={ this.state.score }
-                        timeElapsed={ this.state.timeElapsed }
                     />
                     <Footer />
                 </div>

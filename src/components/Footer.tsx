@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 
-function Footer() {
+const Footer: React.FunctionComponent = () => {
     return (
         <footer className="tetris-footer">
             <p>Created by <a href="https://robertstefanic.com">Robert Stefanic</a></p>

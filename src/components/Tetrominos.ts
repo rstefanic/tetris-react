@@ -1,4 +1,6 @@
-const iPiece = [
+import { Piece, Tetromino } from '../types';
+
+const iPiece: Piece = [
     [
         [1], 
         [1], 
@@ -19,7 +21,7 @@ const iPiece = [
     ]
 ];
 
-const oPiece = [
+const oPiece: Piece = [
     [
         [2, 2],
         [2, 2]
@@ -38,7 +40,7 @@ const oPiece = [
     ]
 ];
 
-const tPiece = [
+const tPiece: Piece = [
     [
         [0, 3, 0],
         [3, 3, 3]
@@ -59,7 +61,7 @@ const tPiece = [
     ]
 ]
 
-const sPiece = [
+const sPiece: Piece = [
     [
         [0, 4, 4],
         [4, 4, 0]
@@ -80,7 +82,7 @@ const sPiece = [
     ]
 ]
 
-const zPiece = [
+const zPiece: Piece = [
     [
         [5, 5, 0],
         [0, 5, 5]
@@ -101,7 +103,7 @@ const zPiece = [
     ]
 ]
 
-const jPiece = [
+const jPiece: Piece = [
     [
         [6, 0, 0],
         [6, 6, 6]
@@ -122,7 +124,7 @@ const jPiece = [
     ]
 ]
 
-const lPiece = [
+const lPiece: Piece = [
     [
         [0, 0, 7],
         [7, 7, 7]
@@ -144,7 +146,7 @@ const lPiece = [
 
 ]
 
-export const iTetromino = {
+export const iTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() {
         if (this.orientation === 0 || this.orientation === 2) {
@@ -166,7 +168,7 @@ export const iTetromino = {
     color: 1
 }
 
-export const oTetromino = {
+export const oTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() { return 0; },
     axisPositionX: function() { return 1; },
@@ -174,7 +176,7 @@ export const oTetromino = {
     color: 2
 }
 
-export const tTetromino = {
+export const tTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() {
         if (this.orientation === 2) {
@@ -196,7 +198,7 @@ export const tTetromino = {
     color: 3
 }
 
-export const sTetromino = {
+export const sTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() {
         if (this.orientation === 0 || this.orientation === 2) {
@@ -211,7 +213,7 @@ export const sTetromino = {
     color: 4
 }
 
-export const zTetromino = {
+export const zTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() {
         if (this.orientation === 0 || this.orientation === 2) {
@@ -226,7 +228,7 @@ export const zTetromino = {
     color: 5 
 }
 
-export const jTetromino = {
+export const jTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() {
         if (this.orientation === 2) {
@@ -248,7 +250,7 @@ export const jTetromino = {
     color: 6
 }
 
-export const lTetromino = {
+export const lTetromino: Tetromino = {
     orientation: 0,
     axisPositionY: function() {
         if (this.orientation === 2) {
@@ -270,7 +272,7 @@ export const lTetromino = {
     color: 7
 }
 
-export const allTetrominos = [
+export const allTetrominos: Tetromino[] = [
     iTetromino,
     oTetromino,
     tTetromino,

@@ -1,8 +1,12 @@
 import React from 'react';
 
-function Tile(props) {
+interface TileProps {
+    numberColor: number;
+}
+
+const Tile: React.FunctionComponent<TileProps> = ({ numberColor }) => {
     let styles = {};
-    switch(props.numberColor) {
+    switch(numberColor) {
         case 1: 
             styles = { "backgroundColor": "steelblue" };
             break; 

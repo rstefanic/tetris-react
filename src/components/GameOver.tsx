@@ -1,13 +1,18 @@
 import React from 'react';
 
-function GameOver(props) {
+interface GameOverProps {
+    score: number;
+    lines: number;
+}
+
+const GameOver: React.FunctionComponent<GameOverProps> = ({ score, lines }) => {
     return (
         <div className="pause-screen">
             <h1>Game Over</h1>
             <div>
                 <h2>Final Score</h2>
-                <p>Score: { props.score }</p>
-                <p>Lines: { props.lines }</p>
+                <p>Score: { score }</p>
+                <p>Lines: { lines }</p>
             </div>
         </div>
     );
