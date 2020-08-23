@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 
 /* Types & Pieces */
 import { startingXPosition, startingYPosition} from '../config';
-import { GameBoard, Tetromino } from '../types';
+import { GameBoard, Tetromino, Points } from '../types';
 import { allTetrominos, iTetromino, oTetromino } from './Tetrominos';
 
 /* Components */
